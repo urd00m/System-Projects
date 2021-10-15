@@ -1,4 +1,4 @@
-BIOS boot method:
+# BIOS boot method:
 
 The BIOS boot sequence - RAM detection -> Hardware Detection/Initialization -> Boot Sequence 
 The boot sequence is where the BIOS is done with initialization and tries to transfer control over to the next stage of the bootloader process 
