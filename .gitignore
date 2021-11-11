@@ -2,3 +2,5 @@
 *.o
 *.iso
 *.out
+cOS/meaty-skeleton/isodir
+cOS/meaty-skeleton/sysroot
