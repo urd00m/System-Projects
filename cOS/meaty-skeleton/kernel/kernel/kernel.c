@@ -16,4 +16,8 @@ void kernel_main(void) {
         }
         //column overflow test
         printf("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()askfhefhaldfalfleajkfj new line plese\n");
+        printf("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()askfhefhaldfalfleajkfj new line plese\n");
+        printf("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()askfhefhaldfalfleajkfj new line plese\n");
+        printf("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()askfhefhaldfalfleajkfj new line plese\n");
+        printf("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()askfhefhaldfalfleajkfj new line plese\n");
 }
