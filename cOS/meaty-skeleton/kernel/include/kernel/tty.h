@@ -8,4 +8,8 @@ void terminal_putchar(char c);
 void terminal_write(const char* data, size_t size);
 void terminal_writestring(const char* data);
 
+//helper function
+void buffer_scroll(); //this will scroll the buffer by one to help implement buffer scrolling for text output
+
+
 #endif
