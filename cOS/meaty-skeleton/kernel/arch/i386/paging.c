@@ -5,6 +5,7 @@
 
 extern void loadPageDirectory(unsigned int*);
 extern void enablePaging();
+extern void breakPaging();
 
 static uint32_t page_directory[1024] __attribute__((aligned(4096)));
 static uint32_t first_page_table[1024] __attribute__((aligned(4096)));
@@ -44,10 +45,13 @@ void setup_paging() {
 		Put the first page table into the page table directory
 	*/
 	page_directory[0] = ((unsigned int)first_page_table) | 3;
+//	page_directory[0] = 0xC0000000 | 3; //This will break it
 
 	/*
 		Write page table to cr3 and enable paging
 	*/
 	loadPageDirectory(page_directory);
 	enablePaging();
+//	breakPaging(); //one way to break paging
+//	loadPageDirectory(3); //Another way to break paging (This also confirms that the paging_asm.S functions are doing there jobs
 }

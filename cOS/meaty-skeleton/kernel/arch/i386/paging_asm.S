@@ -20,3 +20,12 @@ mov %eax, %cr0
 mov %ebp, %esp
 pop %ebp
 ret
+
+.text
+.globl breakPaging
+breakPaging:
+push %ebp
+mov $0x11, %eax
+mov %eax, %cr3
+pop %ebp
+ret
