@@ -4,3 +4,4 @@
 *.out
 cOS/meaty-skeleton/isodir
 cOS/meaty-skeleton/sysroot
+*.swp

@@ -1,6 +1,7 @@
 #include <stdio.h>
 
 #include <kernel/tty.h>
+#include <kernel/paging.h>
 
 void kernel_main(void) {
 	terminal_initialize();
@@ -20,4 +21,8 @@ void kernel_main(void) {
         printf("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()askfhefhaldfalfleajkfj new line plese\n");
         printf("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()askfhefhaldfalfleajkfj new line plese\n");
         printf("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()askfhefhaldfalfleajkfj new line plese\n");
+
+	// Paging tests
+	setup_paging();
+	printf("Paging Enabled");
 }
