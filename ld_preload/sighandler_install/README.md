@@ -2,5 +2,6 @@
 run `make test`
 
 # Notes
-The signal handler doens't actually fix anything in libsig_install.so, since it can't modify the context which means nothing it does will change anything. So need to add in the context to fix the divide by zero error
+The signal handler doens't actually fix anything in libsig_install.so, since it can't modify the context which means nothing it does will change anything. So need to add in the context to fix the divide by zero error.  
 
+sigaction() needs to be used for this, this allows you to get the context needed to make the correct modifications.
