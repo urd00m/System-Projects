@@ -21,7 +21,7 @@ libgety2.so:
 	cc -fPIC -shared -dynamiclib libgety2.c -o libgety2.so
 
 libsig_install.so: libsig_install.c
-	cc -fPIC -dynamiclib -shared libsig_install.c  -o libsig_install.so $(LDLIBS) -lgety2
+	cc -fPIC -dynamiclib -shared libsig_install.c  -o libsig_install.so $(LDLIBS) $(LIBS)
 
 test: all
 	./run.sh
