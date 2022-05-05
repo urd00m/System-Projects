@@ -5,7 +5,7 @@
 // Original functions and hijack flag
 int hijack = 0;
 int (*orig_get_y2)(void) = 0;
-extern int y2;
+int sig_count = 0;
 
 // Our LD_PRELOAD hijack function, that will hijack the get_y2() function call
 int get_y2(void) {
@@ -23,10 +23,14 @@ int get_y2(void) {
 void fpe_handler(int signum) {
 	if(signum == SIGFPE) {
 		signal(SIGFPE, SIG_IGN);
-		printf("Signal handler hit enabling hijack %d %d\n", hijack, y2);
+		printf("Signal handler hit enabling hijack %d\n", hijack);
 		hijack = 1;
-		y2 = 0;
-		signal(SIGFPE, fpe_handler);
+		sig_count++;
+		// Assmebly to correct behavior 
+		asm("mov $0x1, %ecx"); //TODO: doesn't work need to modify the processes context to modify everything
+		if(sig_count < 10) {
+			signal(SIGFPE, fpe_handler);
+		}
 	}
 }
 
