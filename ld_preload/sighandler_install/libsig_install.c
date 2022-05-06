@@ -1,15 +1,19 @@
 #define _GNU_SOURCE
 #include <signal.h>
 #include <dlfcn.h>
+#include <ucontext.h>
+#include <stdio.h>
+
+#include <unistd.h>
+#include <stdint.h>
 
 // Original functions and hijack flag
 int hijack = 0;
 int (*orig_get_y2)(void) = 0;
-int sig_count = 0;
 
 // Our LD_PRELOAD hijack function, that will hijack the get_y2() function call
 int get_y2(void) {
-	printf("running our hijacked get_y2\n");
+	fprintf(stdout, "running our hijacked get_y2\n");
 	if(!hijack) {
 		return orig_get_y2();
 	}
@@ -19,30 +23,44 @@ int get_y2(void) {
 	}
 }
 
+
 // exception handler
-void fpe_handler(int signum) {
-	if(signum == SIGFPE) {
-		signal(SIGFPE, SIG_IGN);
-		printf("Signal handler hit enabling hijack %d\n", hijack);
-		hijack = 1;
-		sig_count++;
-		// Assmebly to correct behavior 
-		asm("mov $0x1, %ecx"); //TODO: doesn't work need to modify the processes context to modify everything
-		if(sig_count < 10) {
-			signal(SIGFPE, fpe_handler);
-		}
-	}
+void fpe_handler(int signum, siginfo_t *si, void *context) {
+	fprintf(stdout, "Signal handler hit enabling hijack %d\n", hijack);
+
+	// convert to ucontext
+	ucontext_t *uc = (ucontext_t *)context;
+
+	fprintf(stdout, "******* INFO *******\n");
+	fprintf(stdout, "RIP 0x%x and updating it to skip instruction\n", (uint8_t*)uc->uc_mcontext.gregs[REG_RIP]);
+	hijack = 1;
+	uc->uc_mcontext.gregs[REG_RIP] += 2; // add 2 bytes
+
+	//asm("mov $0x1, %ecx"); //TODO: doesn't work need to modify the processes context to modify everything
 }
 
 // sets up the signal handler
 void sig_install(void) {
-	signal(SIGFPE, fpe_handler);
+	struct sigaction sa; 
+	memset(&sa, 0, sizeof(sa));
+
+	sa.sa_sigaction = fpe_handler;
+	sa.sa_flags = SA_SIGINFO;
+	sigemptyset(&sa.sa_mask);
+        sigaddset(&sa.sa_mask, SIGFPE);
+	int status = sigaction(SIGFPE, &sa, 0);
+	if(status == -1) {
+		fprintf(stdout, "Signal setup failed\n");
+	}
+	else {
+		fprintf(stdout, "Sig installed\n");
+	}
 }
 
 // Sets up shims
 int setup_shims(void) {
 	#define SHIMIFY_ERR(x)  if ( !(orig_##x = dlsym(((void *) -1l), #x)) ) { \
-                                ERROR("Failed to setup SHIM for " #x "\n"); \
+                                fprintf(stdout, "Failed to setup SHIM for " #x "\n"); \
                                 return -1; \
                         }
 	SHIMIFY_ERR(get_y2);
@@ -50,8 +68,8 @@ int setup_shims(void) {
 }
 
 static __attribute__((constructor)) void libsig_init(void) {
-	printf("I have taken over haha\n");
+	fprintf(stdout, "I have taken over haha\n");
 	sig_install();
 	setup_shims();
-	printf("signal and shims setup complete %d\n", orig_get_y2());
+	fprintf(stdout, "signal and shims setup complete %d\n", orig_get_y2());
 }
