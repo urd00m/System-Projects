@@ -30,11 +30,13 @@ void fpe_handler(int signum, siginfo_t *si, void *context) {
 
 	// convert to ucontext
 	ucontext_t *uc = (ucontext_t *)context;
-
-	fprintf(stdout, "******* INFO *******\n");
-	fprintf(stdout, "RIP 0x%x and updating it to skip instruction\n", (uint8_t*)uc->uc_mcontext.gregs[REG_RIP]);
 	hijack = 1;
-	uc->uc_mcontext.gregs[REG_RIP] += 2; // add 2 bytes
+	//uc->uc_mcontext.gregs[REG_RIP] += 2; // skip the dividing instruction
+	uc->uc_mcontext.gregs[REG_RCX] = 0x1; // set the dividing register to 1 instead of 0
+
+	// Dynamically dtermine instruction size and skip over it TODO: need to add in a decoder to do this
+	
+
 
 	//asm("mov $0x1, %ecx"); //TODO: doesn't work need to modify the processes context to modify everything
 }
@@ -52,9 +54,6 @@ void sig_install(void) {
 	if(status == -1) {
 		fprintf(stdout, "Signal setup failed\n");
 	}
-	else {
-		fprintf(stdout, "Sig installed\n");
-	}
 }
 
 // Sets up shims
@@ -71,5 +70,5 @@ static __attribute__((constructor)) void libsig_init(void) {
 	fprintf(stdout, "I have taken over haha\n");
 	sig_install();
 	setup_shims();
-	fprintf(stdout, "signal and shims setup complete %d\n", orig_get_y2());
+	fprintf(stdout, "signal and shims setup complete\n");
 }
