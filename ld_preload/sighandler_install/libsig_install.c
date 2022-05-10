@@ -3,13 +3,18 @@
 #include <dlfcn.h>
 #include <ucontext.h>
 #include <stdio.h>
-
 #include <unistd.h>
 #include <stdint.h>
+
+// capstone
+#include <capstone/capstone.h>
 
 // Original functions and hijack flag
 int hijack = 0;
 int (*orig_get_y2)(void) = 0;
+
+// Capstone handler
+static csh handle;
 
 // Our LD_PRELOAD hijack function, that will hijack the get_y2() function call
 int get_y2(void) {
@@ -28,21 +33,36 @@ int get_y2(void) {
 void fpe_handler(int signum, siginfo_t *si, void *context) {
 	fprintf(stdout, "Signal handler hit enabling hijack %d\n", hijack);
 
-	// convert to ucontext
+        // cs_insn stores capstone disasm information
+        cs_insn *inst;
+
+	// Get ucontext so we can modified the signal context
 	ucontext_t *uc = (ucontext_t *)context;
+
+	// turn on LD_PRELOAD hijack get_y2() function
 	hijack = 1;
+
+	// Hardcoded fixes
 	//uc->uc_mcontext.gregs[REG_RIP] += 2; // skip the dividing instruction
-	uc->uc_mcontext.gregs[REG_RCX] = 0x1; // set the dividing register to 1 instead of 0
+	//uc->uc_mcontext.gregs[REG_RCX] = 0x1; // set the dividing register to 1 instead of 0
 
-	// Dynamically dtermine instruction size and skip over it TODO: need to add in a decoder to do this
-	
+	// Dynamically skip over instruction
+	void* rip = (void *)uc->uc_mcontext.gregs[REG_RIP];
+        size_t count = cs_disasm(handle,rip,16,(ulong)rip,1,&inst);
+        if(count <= 0) {
+                fprintf(stdout, "Unable to dissassemble code\n");
+                return -1;
+        }
 
+	// skip over the instruction
+	uc->uc_mcontext.gregs[REG_RIP] += inst->size;
 
-	//asm("mov $0x1, %ecx"); //TODO: doesn't work need to modify the processes context to modify everything
+        // get information
+        fprintf(stdout, "instruction: %s %s\t\t\tinstruction size: %d\n", inst->mnemonic, inst->op_str, inst->size);
 }
 
 // sets up the signal handler
-void sig_install(void) {
+int setup_sig(void) {
 	struct sigaction sa; 
 	memset(&sa, 0, sizeof(sa));
 
@@ -53,7 +73,9 @@ void sig_install(void) {
 	int status = sigaction(SIGFPE, &sa, 0);
 	if(status == -1) {
 		fprintf(stdout, "Signal setup failed\n");
+		return -1;
 	}
+	return 0;
 }
 
 // Sets up shims
@@ -66,9 +88,35 @@ int setup_shims(void) {
 	return 0;
 }
 
+// Setup capstone
+int setup_capstone(void) {
+	// open capstone
+	int status = cs_open(CS_ARCH_X86, CS_MODE_64, &handle); 
+        if(status != CS_ERR_OK) {
+                fprintf(stdout, "Failed capstone open\n");
+                return -1;
+        }
+
+        // set options
+        status = cs_option(handle, CS_OPT_SYNTAX, 2); // turns off intel syntax
+        if (status != CS_ERR_OK) {
+                fprintf(stdout, "Failed to set cs_options\n");
+                return -1;
+        }
+
+	return 0;
+}
+
 static __attribute__((constructor)) void libsig_init(void) {
 	fprintf(stdout, "I have taken over haha\n");
-	sig_install();
-	setup_shims();
-	fprintf(stdout, "signal and shims setup complete\n");
+	if(setup_sig() == -1) {
+		fprintf(stdout, "Signal setup failed\n");
+	}
+	if(setup_shims() == -1) {
+		fprintf(stdout, "shims setup failed\n");
+	}
+	if(setup_capstone() == -1) {
+		fprintf(stdout, "capstone setup failed\n");
+	}
+	fprintf(stdout, "lib sig setup complete\n");
 }

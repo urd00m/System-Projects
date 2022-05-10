@@ -1,7 +1,7 @@
 #include <capstone/capstone.h>
 
-// Basic x86 instruction, add %edx,%eax
-#define BASIC_INST "\x01\xd0"
+// Basic x86 instruction,  movl   $0x14,-0x8(%rsp)
+#define BASIC_INST "\xc7\x44\x24\xf8\x14\x00\x00\x00"
 
 // Capstone handler
 static csh handle;
@@ -20,8 +20,15 @@ int main(void) {
 		return -1;
 	}
 
+	// set options
+	status = cs_option(handle, CS_OPT_SYNTAX, 2); // turns off intel syntax
+  	if (status != CS_ERR_OK) {
+		printf("Failed to set cs_options\n");
+    		return -1;
+  	}
+
 	// Run disasm
-	size_t count = cs_disasm(handle,BASIC_INST,2,0x1000,1,&inst);
+	size_t count = cs_disasm(handle,BASIC_INST,16,0x1000,1,&inst);
 	if(count <= 0) {
 		printf("Unable to dissassemble code\n");
 		return -1;
@@ -30,6 +37,7 @@ int main(void) {
 	// get information
 	printf("mnemonic %s\n", inst->mnemonic);
 	printf("operands %s\n", inst->op_str);
+	printf("size %d\n", inst->size);
 
 	// close handler
 	cs_close(&handle);

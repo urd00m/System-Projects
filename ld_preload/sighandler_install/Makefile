@@ -9,7 +9,7 @@
 
 CFLAGS =-g -Wall #-Werror #-Wl,-rpath,$(shell pwd) 
 LIBS = -L. -I. -lgety2
-LDLIBS = -pthread -ldl
+LDLIBS = -pthread -ldl -lcapstone
 
 all: main.o libgety2.so libsig_install.so
 	cc -o main.out main.o  $(CFLAGS) $(LIBS)
