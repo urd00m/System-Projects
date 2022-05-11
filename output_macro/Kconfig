@@ -1,0 +1,5 @@
+mainmenu "Urd00m Output Configuration"
+
+config DEBUG_LEVEL
+    int "Debug Level (0-all, 1-WARN+, 2-ERROR+, 3-FATAL+, 4-None"
+    default 0

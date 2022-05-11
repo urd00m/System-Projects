@@ -8,4 +8,8 @@ This is the building of an operating system using the C programming langauge. Cu
 This is the building of an operating system using the C++ programming langauge. Currently following the OS dev tutorial
 
 ## ld_preload
-This explores the LD_PRELOAD functionality and builds various things with it.
+This explores the LD_PRELOAD functionality and builds various things with it. Like hijacking functions, and installing signal handlers
+
+## capstone
+
+## output_macro
