@@ -15,3 +15,9 @@ This contains DEBUG output macros to easily output debug information. This is fo
 It will output to stderr (IP) and a file (TODO)
 
 It will include time of day (TODO), and TID (IP)
+
+# To use
+* `includes/` must be copied
+* `Makefile` the menuconfig sections must be there
+* `Kconfig` must also be copied
+* `scripts/` must also be copied
