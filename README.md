@@ -11,5 +11,7 @@ This is the building of an operating system using the C++ programming langauge. 
 This explores the LD_PRELOAD functionality and builds various things with it. Like hijacking functions, and installing signal handlers
 
 ## capstone
+Playing with the capstone dissassembler. 
 
 ## output_macro
+Creating my own output macro that allows for menuconfig configuration (setting debug level) and features various additional features for output.

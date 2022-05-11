@@ -7,3 +7,4 @@ cOS/meaty-skeleton/sysroot
 *.so
 my_app
 *.swp
+*.gch
