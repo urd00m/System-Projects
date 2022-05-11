@@ -22,3 +22,6 @@ in `includes/config.h` there is only one field you can set the output level.
 2 - ERROR+
 3 - FATAL+
 4 - NONE
+
+# Websites used
+* https://rucore.net/en/creating-a-linux-rootkit-using-ld_preload/ 
