@@ -1,3 +1,4 @@
+// Rootkit for hiding the rootkit files by hijacking readdir
 #define _GNU_SOURCE
 
 #include "urd00m_output.h"
