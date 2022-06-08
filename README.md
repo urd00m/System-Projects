@@ -15,3 +15,13 @@ Playing with the capstone dissassembler.
 
 ## output_macro
 Creating my own output macro that allows for menuconfig configuration (setting debug level) and features various additional features for output.
+
+## TODO? infini-box
+multiple layers to add in additional security?
+
+## TODO? Nala OS
+Possible OS to achieve a specific task
+
+## TODO? Nala system assistant?
+Possible terminal based voice assistant?
+
