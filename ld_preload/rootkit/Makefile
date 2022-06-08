@@ -18,6 +18,9 @@ libmallochijack.so: libmallochijack.c $(INC)/*.h
 rootkit1.so: rkit1.c $(INC)/*.h
 	cc $(CLFAGS) -fPIC -shared -o $@ $^ $(LIBS) -ldl
 
+rootkit2.so: rkit2.c $(INC)/*.h
+	cc $(CFLAGS) -fPIC -shared -o $@ $^ $(LIBS) -ldl
+
 clean:
 	touch c.so
 	touch c.out
