@@ -25,3 +25,8 @@ in `includes/config.h` there is only one field you can set the output level.
 
 # Websites used
 * https://rucore.net/en/creating-a-linux-rootkit-using-ld_preload/ 
+
+# TODOs
+1. rkit2 process hider
+2. rkit3 obtain superuser
+3. rkit4 mmap? 
