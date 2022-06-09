@@ -1,0 +1,3 @@
+#!/bin/bash
+echo "Jumping to quickbin"
+cd /home/urd00m/Desktop/System-Projects/quickbin/bin
