@@ -1,0 +1,6 @@
+#!/bin/bash
+conda activate cli
+source /Users/alanwang/Desktop/Research/cli/testing/setup_test/venv/bin/activate
+
+#open -a "Google Chrome"
+# TODO: vs code, terminal, slack, discord, etc.
