@@ -12,7 +12,7 @@
 #define HIT_THRESHOLD 80
 #define MULTIPLIER 512
 #define MAX_RUNS 1000
-#define USER_ACCESS 124
+#define SECRET 124
 
 /*
   This program messes with the flush + reload attach that uses clflush 
@@ -30,8 +30,8 @@ int main(void) {
   for(int run = 0; run < MAX_RUNS; run++) {
     // Flush everything and access the secret one
     for(int i = 0; i < 256; i++) _mm_clflush(&test[i * MULTIPLIER]); // flush it
-    test[USER_ACCESS * MULTIPLIER] = 12421;
-    uint64_t* taddr = &test[USER_ACCESS * MULTIPLIER];
+    test[SECRET * MULTIPLIER] = 12421;
+    uint64_t* taddr = &test[SECRET * MULTIPLIER];
     volatile int temp = *taddr;
 
     // Measuring cache timing
