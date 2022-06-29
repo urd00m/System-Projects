@@ -57,7 +57,7 @@ int main(void) {
       idx = i; 
     }
   }
-  printf("User accessed %d, with a %f\%% chance\n", idx, 100.0*(1.0*max/MAX_RUNS));
+  printf("User accessed %d, with a %f%% chance\n", idx, 100.0*(1.0*max/MAX_RUNS));
 
   return 0; 
 }
