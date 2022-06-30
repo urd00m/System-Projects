@@ -16,6 +16,9 @@ Playing with the capstone dissassembler.
 ## output_macro
 Creating my own output macro that allows for menuconfig configuration (setting debug level) and features various additional features for output.
 
+## cache_timing
+Playing with cache timing attacks and seeing how cache side channels can be used to leak secret information. Various microarchitectural attacks take advantage of cache side channels to leak information. 
+
 ## TODO? infini-box
 multiple layers to add in additional security?
 
