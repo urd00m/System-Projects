@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include "urd00m_output.h"
 #ifdef _MSC_VER
 #include <intrin.h> /* for rdtscp and clflush */
 #pragma optimize("gt", on)
@@ -10,7 +11,7 @@
 
 // USER VARIABLES
 #define HIT_THRESHOLD 80
-#define MULTIPLIER 512
+#define MULTIPLIER 256
 #define MAX_RUNS 1000
 #define SECRET 124
 
@@ -57,7 +58,7 @@ int main(void) {
       idx = i; 
     }
   }
-  printf("User accessed %d, with a %f%% chance\n", idx, 100.0*(1.0*max/MAX_RUNS));
+  INFO("User accessed %d, with a %f%% chance\n", idx, 100.0*(1.0*max/MAX_RUNS));
 
   return 0; 
 }
