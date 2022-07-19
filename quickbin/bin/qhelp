@@ -1,0 +1,13 @@
+#!/bin/bash
+echo ---- Quickbin Help ----
+echo
+echo
+echo Command Listing
+echo sysjump           ------ jump to System-Projects
+echo ajump             ------ jump to AI-Projects
+echo njump             ------ jump to AI-Projects/NALA
+echo qbin              ------ jump to quickbin 
+echo nala_bringup      ------ bring up nala workspace
+
+echo qtest             ------ test if quickbin is working
+echo workspace_bringup ------ bring up the current workspace
