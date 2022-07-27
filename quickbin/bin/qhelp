@@ -11,3 +11,4 @@ echo nala_bringup"      "------ bring up nala workspace
 echo qtest"             "------ test if quickbin is working
 echo workspace_bringup" "------ bring up the current workspace
 echo gen"               "------ generate code files quickly - comes with templates
+echo dbuild"            "------ generate coding direcotyr quickly - comes with templates for things
