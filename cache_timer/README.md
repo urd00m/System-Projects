@@ -33,3 +33,6 @@ This test will prime an array (load into cache) then simulating the victim progr
 - [x] flush + reload (basic one done)
 - [ ] evict + reload
 - [x] prime + probe 
+- [ ] measuring cache 
+- [ ] high resolution timer MIT ISCA'22 PACMAN attack 
+

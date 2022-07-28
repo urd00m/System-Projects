@@ -9,3 +9,4 @@ my_app
 *.swp
 *.gch
 *~
+*.dSYM
