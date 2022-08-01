@@ -17,19 +17,33 @@
 */
 
 
+// cpuid stuff
+typedef union {
+  int val;
+  struct {
+    uint16_t line_size:12;
+    uint16_t partitions:10;
+    uint16_t ways:10;
+  } __attribute((packed));
+} __attribute((packed)) ebx_t;
+enum cpuid_reg {eax, ebx, ecx, edx};
 
-// ret is a 4 uint64_t array
-// a -> eax
-// b -> ebx
-// c -> ecx
-// d -> edx
-void cpuid(int leaf, int* ret) {
+
+/*
+  cpuid function
+  ret is a 4 uint64_t array
+  a -> eax
+  b -> ebx
+  c -> ecx
+  d -> edx
+*/
+void cpuid(int leaf, int ecx, int* ret) {
   // run cpuid 
   uint64_t a = leaf, b, c, d;
-  asm ( "mov $3, %%ecx\n"
+  asm ( "mov %5, %%ecx\n"
         "cpuid\n\t"
         : "=a" (a), "=b" (b), "=c" (c), "=d" (d)
-        : "0" (a)
+        : "0" (a), "r" (ecx)
         );
   ret[0] = a;
   ret[1] = b;
@@ -37,12 +51,16 @@ void cpuid(int leaf, int* ret) {
   ret[3] = d; 
 }
 
+
+/*
+  Main function
+*/
 int main(void) {
   INFO("Starting\n"); // starting test
   int cpuid_ret[4];
-  enum cpuid_reg {eax, ebx, ecx, edx}; 
 
-  cpuid(4, cpuid_ret);
+  // call cpuid leaf 4, ecx, then return array
+  cpuid(4, 3, cpuid_ret);
 
   INFO("eax: %x\n", cpuid_ret[eax]);
   INFO("ebx: %x\n", cpuid_ret[ebx]);
@@ -56,11 +74,11 @@ int main(void) {
   INFO("Cache level: %d\n", cache_level);
 
   // cache information
-  int ebx_ret = cpuid_ret[ebx];
+  ebx_t ebx_ret = (ebx_t)cpuid_ret[ebx];
   int ecx_ret = cpuid_ret[ecx];
-  INFO("ways: %d\n", ((ebx_ret & 0xffc00000)>>22)+1); // 31:22, 0xffc0 0000
-  INFO("partitions: %d\n", ((ebx_ret & 0x003ff000)>>12)+1); // 21:12, 0x003f f000
-  INFO("line_size: %d\n", (ebx_ret & 0x00000fff)+1); // 11:0, 0x0000 0fff
+  INFO("ways: %d\n", (ebx_ret.ways+1)); 
+  INFO("partitions: %d\n", (ebx_ret.partitions+1)); 
+  INFO("line_size: %d\n", (ebx_ret.line_size+1)); 
   INFO("sets: %d\n", ecx_ret+1);
   return 0; 
 }
