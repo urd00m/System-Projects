@@ -20,5 +20,7 @@ cpuid_reader.out: cpuid_reader.c
 clean:
 	touch clean.o
 	touch clean.out
+	touch clean.out.dSYM
 	rm *.o
 	rm *.out
+	rm -r *.out.dSYM
