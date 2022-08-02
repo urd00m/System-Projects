@@ -47,3 +47,35 @@ sets: 8192
 total size: 8MB  
 
 #### CPUID return information (eax=0x18, leaf 18) 
+ecx=0 reports eax=0x7, meaning the max ecx value we can have is 7.  
+
+ecx=1  
+Exists TLB that supports 4k, 2m, and 4m  
+8-way (fully associative) 1-set TLB, Instruction TLB (level 1)  
+
+ecx=2  
+Exists TLB that supports 4k, 2m, 4m, and 1g  
+16-way (fully associative) 1-set TLB, Unknown type TLB (level 1) (type id was 5, but only goes from 0-3 others are reserved so unknown what this means)  
+
+ecx=3  
+Exists TLB that supports 4k  
+4-way 16-set TLB, unknown type (level 1) (type id was 4)  
+
+ecx=4  
+Exists TLB that supports 2m and 4m  
+4-way 8-set TLB, unknown type (level 1) (type id was 4)  
+
+ecx=5  
+Exists TLB that supports 1g  
+8-way (fully associative) 1-set TLB, Unknown type TLB (level 1) (type id was 4)  
+
+ecx=6  
+Exists TLB that supports 4k, 2m, and 4m  
+8-way 128-set TLB, Unified TLB (level 2)  
+
+ecx=7  
+Exists TLB that supports 4k and 1g 
+8-way 128-set TLB, Unified TLB (level 2) 
+
+
+# Forming Cache Eviction Set 

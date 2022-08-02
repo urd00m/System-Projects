@@ -28,6 +28,12 @@ To run this test run `./prime_probe.out`.
 
 This test will prime an array (load into cache) then simulating the victim program running (by clflush'ing a SECRET from the array) then remeasuring the time to figure out hte secret. It does a set amount of trials then finds the highest probabiliy index. This attack is very accurate and able to find the secret a lot of the times. 
 
+## Measuring Cache 
+see `i7_writeup.md`
+
+## Evict + reload 
+
+
 # TODOs
 - [x] Cache timing basic
 - [x] flush + reload (basic one done)
