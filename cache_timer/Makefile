@@ -1,9 +1,9 @@
 CC=gcc 
-CFLAGS=-Wall -g
+CFLAGS=-Wall -g -O2
 LIBS=-I$(INC) -L.
 INC=includes
 
-all: cache_timing_test.out flush_reload.out prime_probe.out cpuid_reader.out
+all: cache_timing_test.out flush_reload.out prime_probe.out cpuid_reader.out measure_cache.out
 
 cache_timing_test.out: cache_timing_test.c
 	$(CC) $^ $(CFLAGS) $(LIBS) -o $@
@@ -15,6 +15,9 @@ prime_probe.out: prime_probe.c
 	$(CC) $^ $(CFLAGS) $(LIBS) -o $@
 
 cpuid_reader.out: cpuid_reader.c
+	$(CC) $^ $(CFLAGS) $(LIBS) -o $@
+
+measure_cache.out: measure_cache.c 
 	$(CC) $^ $(CFLAGS) $(LIBS) -o $@
 
 clean:

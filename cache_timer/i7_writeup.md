@@ -78,8 +78,11 @@ Exists TLB that supports 4k, 2m, and 4m
 8-way 128-set TLB, Unified TLB (level 2)  
 
 ecx=7  
-Exists TLB that supports 4k and 1g 
-8-way 128-set TLB, Unified TLB (level 2) 
-
+Exists TLB that supports 4k and 1g  
+8-way 128-set TLB, Unified TLB (level 2)  
 
 # Forming Cache Eviction Set 
+In the PACMAN paper ISCA'22 the formula used to measure cache was,  
+addrs[i] = i + i * stride + i * 64 bytes (line size), where i is 1...N  
+
+Interesting, for int[], it seems to map each int to an different pointer differing by 1, I would think they differ by 4. Since an int is 4 bytes. (Wait I think this is due to compiler or underlying language where they automatically add the *4 for you but it appears as if it is accessing 1 by 1, testing shows that they allocated ~~8 bytes for each int :\~~ 4 bytes correctly which is automatically added when doing the pointer manipulation)
