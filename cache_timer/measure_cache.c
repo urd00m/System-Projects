@@ -48,8 +48,8 @@ int main(void) {
   pthread_create(&tid, NULL, timerthread, NULL);
   
   // Hyper Variables
-  int N = 30;
-  uint64_t stride = 1*16384; // 16kb
+  int N = 100;
+  uint64_t stride = 4 * 1048576; // 4 mb
   uint64_t num_trials = 1000;
   uint64_t start, elapsed;
   

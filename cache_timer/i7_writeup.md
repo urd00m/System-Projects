@@ -86,3 +86,7 @@ In the PACMAN paper ISCA'22 the formula used to measure cache was,
 addrs[i] = i + i * stride + i * 64 bytes (line size), where i is 1...N  
 
 Interesting, for int[], it seems to map each int to an different pointer differing by 1, I would think they differ by 4. Since an int is 4 bytes. (Wait I think this is due to compiler or underlying language where they automatically add the *4 for you but it appears as if it is accessing 1 by 1, testing shows that they allocated ~~8 bytes for each int :\~~ 4 bytes correctly which is automatically added when doing the pointer manipulation)
+
+
+#### Log 8/7/22
+After nuking the tlbs the data generated makes no sense. Running with a stride of 16KB didn't yield any results that made any sense. The access times got shorter with more addresses being brought into cache, which makes no sense even with large N values the tlb's seemed to be able to handle it faster. After thinking, maybe it was because the TLBs could handle up to 4mb somtimes 1 gb page sizes, so maybe we need to increase the stride to 4 MB, after doing that no difference in reuslts either TLB access still got faster, not slower as N increased for some reason. 
