@@ -56,7 +56,7 @@ Exists TLB that supports 4k, 2m, and 4m
 ecx=2  
 Exists TLB that supports 4k, 2m, 4m, and 1g  
 16-way (fully associative) 1-set TLB, Unknown type TLB (level 1) (type id was 5, but only goes from 0-3 others are reserved so unknown what this means)  
-Looking at Intel's manuals, this is a instruction TLB for larger pages  
+Looking at Intel's manuals, this is maybe an instruction TLB for larger pages  
 
 ecx=3  
 Exists TLB that supports 4k  

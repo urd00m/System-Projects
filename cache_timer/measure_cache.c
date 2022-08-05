@@ -26,13 +26,13 @@ void timerthread() {
 // after tests same as rdtscp
 void read_timer(uint64_t* time) {
   // barrier
-  asm("lfence;\n\tmfence\n");
+  asm("lfence;\n\tmfence\nsfence\n");
 
   // read
   *time = counter; 
 
   // barrier
-  asm("lfence;\n\tmfence\n");
+  asm("lfence;\n\tmfence\nsfence\n");
 }
 
 
@@ -50,8 +50,9 @@ int main(void) {
   pthread_create(&tid, NULL, timerthread, NULL);
   
   // Hyper Variables
-  int N = 30;
-  uint64_t stride = 4 * 1048576; // 4 mb
+  int N = 100;
+  uint64_t stride = 1024 * 1048576; // 4 mb
+  //uint64_t stride = 16384; // 16kb
   uint64_t num_trials = 10000;
   uint64_t start, elapsed;
   
@@ -70,7 +71,8 @@ int main(void) {
 
   // measure timing up to N (1000 trials)
   volatile int target = 0xdeadbeef;
-  WARN("Target address %p\n", &target);
+  volatile int* p = &target;
+  INFO("Target address %p\n", p);
 
   // cache hit measurements
   int junktemp = 1;
@@ -102,29 +104,45 @@ int main(void) {
     
     // Run trials
     for(long t = 0; t < num_trials; t++) {
-      asm("lfence\nmfence\n");
-      // load x
-      volatile int* p = &target;
+      // isb
+      asm("lfence\nmfence\nsfence\n");
+
+      // measure initial speed
       junk = *p; // load into cache
-      start = __rdtscp(&junk);
+      //start = __rdtscp(&junk);
+      read_timer(&start);
       junk = *p;
-      elapsed = __rdtscp(&junk) - start;
+      read_timer(&elapsed);
+      elapsed -= start;
+      //elapsed = __rdtscp(&junk) - start;
       start_data[t] = elapsed;
-      asm("lfence\nmfence\n");
+
+      // isb
+      asm("lfence\nmfence\nsfence\n");
+      
       // give value (access so it is in cache)
       for(long i = 0; i < n; i++) {
-        //int mix_i = ((i * 167) + 13) % n; //mix to avoid prefetchers and other things 
-        volatile int* point = (int*)addrs[i];
-        junk = *point; 
+        int mix_i = ((i * 167) + 13) % n; //mix to avoid prefetchers and other things 
+        volatile int* point = (int*)addrs[mix_i];
+        junk = *point;
+        *point = i;
       }
-      asm("lfence\nmfence\n");
+
+      // isb
+      asm("lfence\nmfence\nsfence\n");
+      
       // remeasure target
-      start = __rdtscp(&junk);
+      //start = __rdtscp(&junk);
+      read_timer(&start);
       junk = *p;
-      elapsed = __rdtscp(&junk) - start;
+      read_timer(&elapsed);
+      elapsed -= start;
+      //elapsed = __rdtscp(&junk) - start;
       end_data[t] = elapsed;
-      //WARN("%p, %p\tThese should differ by 4\n", &x[0], &x[1]); //should differ by 4
-      asm("lfence\nmfence\n");
+      //_mm_clflush(p); //DELETE
+
+      //isb
+      asm("lfence\nmfence\nsfence\n");
     }
 
     // mean calculation
@@ -136,6 +154,7 @@ int main(void) {
     end_mean /= (double)num_trials;
     start_mean /= (double)num_trials;
     INFO("n %d, start_mean: %f \tend_mean: %f\n", n, start_mean, end_mean);
+    WARN("%d %f %f\n", n, start_mean, end_mean); 
 
     // recauluate first addrs access time
     int rand_idx = rand()%N;
