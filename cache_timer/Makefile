@@ -1,5 +1,5 @@
 CC=gcc 
-CFLAGS=-Wall -g -O2
+CFLAGS=-Wall -g -O0
 LIBS=-I$(INC) -L.
 INC=includes
 
