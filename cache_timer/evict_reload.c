@@ -15,6 +15,7 @@
 
 
 volatile uint64_t counter;
+volatile uint64_t counter2 = 123;
 
 // thread timer
 void timerthread() {
@@ -82,14 +83,9 @@ int main(void) {
     // access (bring to cache) 
     junk = *p;
 
-    // DELETE
-    read_timer(&start);
-    junk = *p;
-    read_timer(&elapsed);
-    elapsed -= start;
-    INFO("idx: %d, cycles: %d, miss: %d\n", i, elapsed, elapsed > THRESHOLD); // want misses on evens
-    data[i] = elapsed;
-    // DELETE
+    // INTERESTING!!!! There for some reason needs to be a read from a global variable
+    volatile int temp = counter2;
+    //read_timer(&elapsed); //this also works for some reason
     
     // isb
     asm("lfence\nmfence\nsfence\n");

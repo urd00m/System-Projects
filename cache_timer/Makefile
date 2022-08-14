@@ -3,7 +3,7 @@ CFLAGS=-Wall -g -O0
 LIBS=-I$(INC) -L.
 INC=includes
 
-all: cache_timing_test.out flush_reload.out prime_probe.out cpuid_reader.out measure_cache.out evict_reload.out
+all: cache_timing_test.out flush_reload.out prime_probe.out cpuid_reader.out measure_cache.out evict_reload.out evict_reload2.out
 
 cache_timing_test.out: cache_timing_test.c
 	$(CC) $^ $(CFLAGS) $(LIBS) -o $@
@@ -21,6 +21,9 @@ measure_cache.out: measure_cache.c
 	$(CC) $^ $(CFLAGS) $(LIBS) -o $@
 
 evict_reload.out: evict_reload.c
+	$(CC) $^ $(CFLAGS) $(LIBS) -o $@
+
+evict_reload2.out: evict_reload2.c
 	$(CC) $^ $(CFLAGS) $(LIBS) -o $@
 
 clean:
