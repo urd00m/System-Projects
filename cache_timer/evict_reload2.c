@@ -51,7 +51,7 @@ void read_timer(uint64_t* time) {
 #define SECRET 678
 #define THRESHOLD 55
 #define N 70L
-#define NUM_TRIALS 10000
+#define NUM_TRIALS 1000
 #define STRIDE (1024L * 1048576)
 #define SHARED_SIZE 1024
 
@@ -79,8 +79,9 @@ int main(void) {
   INFO("Eviction set built\n");
 
   // creating shared memory component
-  int shared[SHARED_SIZE];
-  shared[SECRET] = 0xdeadbeef;
+  //int shared[SHARED_SIZE * 4096]; // 4 * 4KB strides
+  int *shared = (int *)malloc(sizeof(int)*(SHARED_SIZE*STRIDE/4)+100);
+  shared[SECRET * STRIDE/4] = 0xdeadbeef;
 
   // run attack
   volatile int junk = 0;
@@ -99,7 +100,7 @@ int main(void) {
     asm("lfence\nmfence\nsfence\n");
     
     // access (bring to cache)
-    volatile int* secret_addr = &shared[SECRET];
+    volatile int* secret_addr = &shared[SECRET * STRIDE/4];
     junk = *secret_addr;
     read_timer(&elapsed);
 
@@ -111,7 +112,7 @@ int main(void) {
       //for(int i = 678; i < 679; i++) {
       int mix_i = ((i * 167) + 13) % SHARED_SIZE; //mix to avoid prefetchers and other things
       //int mix_i = i;
-      volatile int* p = &shared[mix_i];
+      volatile int* p = &shared[mix_i * STRIDE/4];
       read_timer(&start);
       junk = *p;
       read_timer(&elapsed);

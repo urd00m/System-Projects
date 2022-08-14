@@ -34,11 +34,13 @@ see `i7_writeup.md`
 ## Evict + reload 
 The files for this test are located below,  
 - `evict_reload.c` 
+- `evict_reload2.c`
 
 The command to compile this is `make evict_reload.out` or `make` or `make all`.  
 To run this test run `./evict_reload.out`. This test will load a secret address and on even number trials it will access that secret address. This program will then determine if that address was accessed or not. The way it will do that is by evicting out the accessed address from cache by using 70 eviction addresses determined using the strategy from "Measuring Cache". If the address was accessed we should see the difference from the high resolution thread timer. 
 
-TODO, actaully determine secret. 
+The command to compile this is `make evict_reload2.out` or `make` or `make all`.  
+To run this test run `./evict_reload2.out`. This test will use the evict + reload attack to determine a secret address that was accessed. In progress.
 
 
 # TODOs

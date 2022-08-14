@@ -91,7 +91,7 @@ int main(void) {
     asm("lfence\nmfence\nsfence\n");
       
     // evict on evens
-    if(i%2 == 0) {
+    if(i%7 == 0) {
       for(long i = 0; i < N; i++) {
         int mix_i = ((i * 167) + 13) % N; //mix to avoid prefetchers and other things 
         volatile int* point = (int*)addrs[mix_i];
@@ -111,8 +111,8 @@ int main(void) {
     data[i] = elapsed;
 
     // calculate correctness
-    if(i%2 == 0 && elapsed > THRESHOLD) correct++;
-    else if(i%2 == 1 && elapsed < THRESHOLD) correct++;
+    if(i%7 == 0 && elapsed > THRESHOLD) correct++;
+    else if(i%7 != 0 && elapsed < THRESHOLD) correct++;
     
     // isb
     asm("lfence\nmfence\nsfence\n");      
