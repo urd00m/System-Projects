@@ -50,8 +50,8 @@ void read_timer(uint64_t* time) {
 */
 #define SECRET 1023
 #define THRESHOLD 45
-#define N 100L
-#define NUM_TRIALS 1000
+#define N 50L
+#define NUM_TRIALS 100
 #define STRIDE (1024L * 1048576)
 #define SHARED_SIZE 1024
 #define SECRET_STRIDE (256L * 1048576) 
@@ -75,12 +75,10 @@ int main(void) {
   volatile int* addrs[N];
   for(long i = 0; i < N; i++) { // divide stride by 4 to account for the *4 attached by compiler 
     addrs[i] = (int*)x + i*(STRIDE/4) + i*16;  //formula listed in i7_writeup.md
-    //INFO("Addr %p %p %d %d\n", addrs[i], &x[i*(STRIDE/4)+i*16], i*(STRIDE/4)+i*16, *addrs[i]);
   }
   INFO("Eviction set built\n");
 
   // creating shared memory component
-  //int shared[SHARED_SIZE * 4096]; // 4 * 4KB strides
   int *shared = (int *)malloc(sizeof(int)*(SHARED_SIZE*SECRET_STRIDE/4)+100);
   shared[SECRET * SECRET_STRIDE/4] = 0xdeadbeef;
 
@@ -118,10 +116,8 @@ int main(void) {
       elapsed -= start;
 
       // check
-      if(elapsed < THRESHOLD) {
+      if(elapsed < THRESHOLD) 
         data[mix_i]++;
-        //INFO("HIT %d\n", elapsed);
-      }
     }
 
     //isb
@@ -138,7 +134,7 @@ int main(void) {
       max = data[i];
     }
   }
-  ERROR("Guess is idx %d\n", max_idx);
+  ERROR("Guess is idx %d with %.3g%% confidence\n", max_idx, ((double)max)/NUM_TRIALS*100);
   
   // clean up
   pthread_join(&tid, NULL);
