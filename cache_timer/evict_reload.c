@@ -36,18 +36,24 @@ void read_timer(uint64_t* time) {
 }
 
 #define SECRET 678
-#define THRESHOLD 60
+#define THRESHOLD 55
 
 int main(void) {
   INFO("Evict + reload test\n");
+
+  // timing items
   pthread_t tid;
   pthread_create(&tid, NULL, timerthread, NULL);
-  
+
   // using 1 gb stride
-  int N = 1; // 50 eviction addresses
+  int N = 100; // 50 eviction addresses
   uint64_t stride = 1024 * 1048576;
-  uint64_t num_trials = 100; // 1000 trials
+  uint64_t num_trials = 10000; // 1000 trials
   uint64_t start, elapsed;
+  
+  // data items
+  uint64_t data[num_trials];
+  uint64_t correct = 0;
   
   // Get x and addrs 
   int* x;
@@ -69,7 +75,6 @@ int main(void) {
 
   // testing (only use eviction on even idx)
   volatile int junk = 0;
-  uint64_t data[num_trials];
   for(int i = 0; i < num_trials; i++) {
     // isb
     asm("lfence\nmfence\nsfence\n");
@@ -90,7 +95,6 @@ int main(void) {
     asm("lfence\nmfence\nsfence\n");
       
     // evict on evens
-    /*
     if(i%2 == 0) {
       for(long i = 0; i < N; i++) {
         int mix_i = ((i * 167) + 13) % N; //mix to avoid prefetchers and other things 
@@ -98,7 +102,6 @@ int main(void) {
         junk = *point;
       }
     }
-    */
     
     // isb
     asm("lfence\nmfence\nsfence\n");
@@ -110,6 +113,10 @@ int main(void) {
     elapsed -= start;
     WARN("idx: %d, cycles: %d, miss: %d\n", i, elapsed, elapsed > THRESHOLD); // want misses on evens
     data[i] = elapsed;
+
+    // calculate correctness
+    if(i%2 == 0 && elapsed > THRESHOLD) correct++;
+    else if(i%2 == 1 && elapsed < THRESHOLD) correct++;
     
     // isb
     asm("lfence\nmfence\nsfence\n");      
@@ -120,7 +127,9 @@ int main(void) {
   for(int i = 0; i < num_trials; i++) mean += (double)data[i];
   mean /= (double)num_trials;
   ERROR("mean %f\n", mean);
-  
+  ERROR("Correct %llu, percentage accuracy %f%%\n", correct, ((double)correct)/num_trials * 100);
+
+  // clean up
   pthread_join(&tid, NULL);
   return 0;
 }
