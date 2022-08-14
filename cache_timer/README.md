@@ -30,7 +30,7 @@ This test will prime an array (load into cache) then simulating the victim progr
 
 ## Measuring Cache 
 see `i7_writeup.md`  
-**tlb graph**
+**tlb graph**  
 ![tlb graph](https://raw.githubusercontent.com/urd00m/System-Projects/master/cache_timer/tlb_measurements.png)
 
 ## Evict + reload 
