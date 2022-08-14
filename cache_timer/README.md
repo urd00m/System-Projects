@@ -20,7 +20,7 @@ To run this test run `./flush_reload.out`.
 This test will continously flush then reload the user secret into an array. It will then collect which indexes passed the threshold and at the end print out what it thinks the secret is based on what index was accessed the most as well its percentage. Some interesting notes! I intially did only one MAX_RUN but this turned out to be inaccurate due to other things happening on the computer some things might be brought into cache while others evicted its somewhat random, so if MAX_RUN wasn't high enough you had a chance of mispredicting what the correct result which at first was surprising but makes sense after further thought. 
 
 ## Prime + Probe 
-Te files for this test are located below,  
+The files for this test are located below,  
 - `prime_probe.c`
 
 The command to compile this is `make prime_probe.out` or `make` or `make all`.  
@@ -32,13 +32,21 @@ This test will prime an array (load into cache) then simulating the victim progr
 see `i7_writeup.md`
 
 ## Evict + reload 
+The files for this test are located below,  
+- `evict_reload.c` 
+
+The command to compile this is `make evict_reload.out` or `make` or `make all`.  
+To run this test run `./evict_reload.out`. This test will load a secret address and on even number trials it will access that secret address. This program will then determine if that address was accessed or not. The way it will do that is by evicting out the accessed address from cache by using 70 eviction addresses determined using the strategy from "Measuring Cache". If the address was accessed we should see the difference from the high resolution thread timer. 
+
+TODO, actaully determine secret. 
 
 
 # TODOs
 - [x] Cache timing basic
 - [x] flush + reload (basic one done)
-- [ ] evict + reload
+- [x] evict + reload
 - [x] prime + probe 
-- [ ] measuring cache 
-- [ ] high resolution timer MIT ISCA'22 PACMAN attack 
+- [x] measuring cache 
+- [x] high resolution timer MIT ISCA'22 PACMAN attack 
+- [ ] prime + probe reading (find the paper) 
 

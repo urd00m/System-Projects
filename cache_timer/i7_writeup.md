@@ -90,3 +90,6 @@ Interesting, for int[], it seems to map each int to an different pointer differi
 
 #### Log 8/7/22
 After nuking the tlbs the data generated makes no sense. Running with a stride of 16KB didn't yield any results that made any sense. The access times got shorter with more addresses being brought into cache, which makes no sense even with large N values the tlb's seemed to be able to handle it faster. After thinking, maybe it was because the TLBs could handle up to 4mb somtimes 1 gb page sizes, so maybe we need to increase the stride to 4 MB, after doing that no difference in reuslts either TLB access still got faster, not slower as N increased for some reason. 
+
+#### Log 8/13/22 
+It appears that the issues with evict + reload was caused by mfence...lfence instructions getting in the way of things causing the additional overhead. Accuracy of the evict + reload attack to determine if the secret address was accessed is around ~80%. 
