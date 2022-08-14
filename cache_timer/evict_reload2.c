@@ -102,7 +102,7 @@ int main(void) {
       // access (bring to cache)
       volatile int* secret_addr = &shared[SECRET * SECRET_STRIDE/4];
       junk = *secret_addr;
-      read_timer(&elapsed);
+      read_timer(&elapsed); // For some reason this improves accuracy (the access to the global variable is what does it, not the mfence...sfence stuff)
       
       // isb
       asm("lfence\nmfence\nsfence\n");
@@ -119,9 +119,6 @@ int main(void) {
       if(elapsed < THRESHOLD) 
         data[mix_i]++;
     }
-
-    //isb
-    asm("lfence\nmfence\nsfence\n");
   }
 
   // results
