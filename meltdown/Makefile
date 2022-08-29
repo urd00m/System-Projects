@@ -1,12 +1,12 @@
 CC=gcc
-CFLAGS=-Wall -g
+CFLAGS=-Wall -g -O0
 INC=./includes
 LIBS=-I$(INC) -L./lib
 
-all: main.out
+all: initial_test.out
 
-main.out: src/main.c
-	$(CC) $^ $(CFLAGS) $(LIBS) -o $@
+initial_test.out: src/initial_test.c 
+	$(CC) $(CFLAGS) $(LIBS) $^ -o $@
 
 clean:
 	touch clean.o
