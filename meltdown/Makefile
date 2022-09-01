@@ -11,5 +11,7 @@ initial_test.out: src/initial_test.c
 clean:
 	touch clean.o
 	touch clean.out
+	touch clean.dSYM
+	rm -rf *.dSYM
 	rm *.o
 	rm *.out
