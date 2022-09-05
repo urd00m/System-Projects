@@ -18,9 +18,9 @@
   config information
 */
 #define DEBUG 0
-#define RETRIES 1000
+#define RETRIES 10
 #define THRESHOLD 250
-
+#define NULL_IGNORED 1
 
 /*
   Helper functions

