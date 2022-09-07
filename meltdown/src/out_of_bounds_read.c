@@ -1,7 +1,7 @@
 /*
   Testing out of bounds reads with meltdown
  */
-#include "libmeltdown.c"
+#include "libmeltdown.h"
 
 #define MELTDOWN_ON 1
 #define FIND_VALUES 0
