@@ -17,7 +17,7 @@
   config information
 */
 #define DEBUG 1
-#define RETRIES 1000
+#define RETRIES 10
 #define THRESHOLD 250
 
 

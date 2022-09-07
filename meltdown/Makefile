@@ -1,18 +1,21 @@
 CC=gcc
 CFLAGS=-Wall -g -O0
 INC=./includes
-LIBS=-I$(INC) -L./lib
+LIBS=-I$(INC) -L./libs
 
-all: initial_test.out lib/libmeltdown.so out_of_bounds_read.out
+all: initial_test.out libs/libmeltdown.so out_of_bounds_read.out heap_test.out
 
 initial_test.out: src/initial_test.c 
 	$(CC) $(CFLAGS) $(LIBS) $^ -o $@
 
-lib/libmeltdown.so: src/libmeltdown.c 
+libs/libmeltdown.so: src/libmeltdown.c 
 	$(CC) $(CFLAGS) -fPIC -shared $(LIBS) $^ -o $@
 
 out_of_bounds_read.out: src/out_of_bounds_read.c
-	$(CC) $(CFLAGS) $(LIBS) $^ -o $@
+	$(CC) $(CFLAGS) $(LIBS) $^ -o $@ -lmeltdown -lm
+
+heap_test.out: src/heap_test.c
+	$(CC) $(CFLAGS) $(LIBS) $^ -o $@ -lmeltdown -lm
 
 clean:
 	touch clean.o

