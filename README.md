@@ -19,6 +19,9 @@ Creating my own output macro that allows for menuconfig configuration (setting d
 ## cache_timing
 Playing with cache timing attacks and seeing how cache side channels can be used to leak secret information. Various microarchitectural attacks take advantage of cache side channels to leak information. 
 
+## quickbin
+Tools for the command line. Includes tools to speedup software development. 
+
 ## meltdown
 Attempting to use the meltdown attack and see what I can do with it.
 
