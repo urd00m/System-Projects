@@ -5,6 +5,7 @@ import sys
 import click
 import os
 from pathlib import Path
+import subprocess
 
 
 '''
@@ -30,20 +31,21 @@ def read_qfile():
     ret = {}
     line = qfile.readline()
     while(len(line) > 0):
-        print(line)
-        print(line.split(" ")[1])
+        key = line.split(" ")[0].strip()
+        path = line.split(" ")[1].strip()
+        
         # ensure unique key names 
-        if(line.split(" ")[0] in ret.keys()):
+        if(key in ret.keys()):
             print("ERROR! Duplicate key names in .qjump_save not allowed!")
             sys.exit(1)
 
         # ensure path exists
-        if(valid_path(line.split(" ")[1]) == False):
+        if(valid_path(path) == False):
             print("ERROR! Path invalid!")
             sys.exit(1)
 
         # add to dict
-        ret[line.split(" ")[0]] = line.split(" ")[1] 
+        ret[key] = path
         line = qfile.readline()
 
     # close qfile
@@ -64,11 +66,6 @@ def write_qfile():
 # TODO JUMP 
 
 
-
-
-
-
-
 # qjump command
 @click.command(short_help="quick jump command, ability to jump easily")
 @click.argument("key")
@@ -80,9 +77,23 @@ def qjump(key):
     # read file
     key_to_path_map = read_qfile()
 
-    for key in key_to_path_map.keys():
-        print(f"{key} {key_to_path_map[key]}")
+    # jump
+    try:
+        dest = key_to_path_map[key]
+    except: 
+        print("key doesn't exist!")
+        sys.exit(1)
+    os.chdir(dest)
+    os.system('open -a Terminal .')
+#    subprocess.run("open -a Terminal", shell=True)
+
 
 # main function
 if __name__ == '__main__':
     qjump()
+
+'''
+Python can't change the user's directory only the working directory. The only way around this is to create a new terminal window pop up which is not ideal. Might need to switch to bash to do this, but would need to do a simplified version. 
+
+https://www.cyberciti.biz/faq/unix-howto-read-line-by-line-from-file/
+'''
