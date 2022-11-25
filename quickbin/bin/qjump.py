@@ -85,7 +85,6 @@ def qjump(key):
         sys.exit(1)
     os.chdir(dest)
     os.system('open -a Terminal .')
-#    subprocess.run("open -a Terminal", shell=True)
 
 
 # main function
