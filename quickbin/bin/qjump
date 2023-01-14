@@ -5,6 +5,9 @@ SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
 # qjump files 
 DEFAULT_SAVE_FILE="$SCRIPT_DIR/.qjump_save"
+if [ ! -f "$DEFAULT_SAVE_FILE" ]; then
+    touch $DEFAULT_SAVE_FILE
+fi
 
 # argument check
 if [ $# -lt 1 ] || [ $# -gt 2 ]; then
