@@ -1,3 +1,8 @@
-export MY_HOME_DIR=/Users/alanwang/Desktop
-export PATH=$PATH:${MY_HOME_DIR}/System-Projects/quickbin/bin
-export QBIN_DIR=${MY_HOME_DIR}/System-Projects/quickbin/bin
+#!/bin/bash
+
+# get current script directory 
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+
+# setup path
+export PATH=$PATH:${SCRIPT_DIR}/bin
+export QBIN_DIR=${SCRIPT_DIR}/bin

@@ -1,3 +1,0 @@
-#!/bin/bash
-echo "Jumping to AI-Projects"
-cd ${MY_HOME_DIR}/AI-Projects
