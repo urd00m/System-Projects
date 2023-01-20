@@ -1,3 +1,3 @@
 #!/bin/bash
 echo "Jumping to System-Projects"
-cd ${MY_HOME_DIR}/System-Projects
+cd ${PROJECT_DIR}
