@@ -21,34 +21,40 @@ else
    LINENUM=1
    while IFS= read -r LINE
    do
-     # split by space 
-     LINEARRAY=($LINE)
-   
-     # check if matches input
-     if [[ $1 == ${LINEARRAY[0]} ]]; then
-        if [ $# -eq 1 ]; then
-           cd "${LINEARRAY[1]}"
-           JUMPSTATUS=$?
-           FOUND=1
-           break
-        else
-           sed -i'' -e ''${LINENUM}'d' $INPUT
-           FOUND=0
-           break
-        fi
-     fi
-     LINENUM=$((LINENUM+1))
+     if [ $1 == "list" ]; then 
+        echo $LINE 
+     else 
+      # split by space 
+      LINEARRAY=($LINE)
+      
+      # check if matches input
+      if [[ $1 == ${LINEARRAY[0]} ]]; then
+         if [ $# -eq 1 ]; then
+            cd "${LINEARRAY[1]}"
+            JUMPSTATUS=$?
+            FOUND=1
+            break
+         else
+            sed -i'' -e ''${LINENUM}'d' $INPUT
+            FOUND=0
+            break
+         fi
+      fi
+      LINENUM=$((LINENUM+1))
+     fi 
    done < "$INPUT"
    
    # check if appending new target or output
-   if [ $FOUND -eq 0 ] && [ $# -eq 2 ]; then
-      echo "${1} ${2}" >> $INPUT
-      echo "Added new target to save file!"
-   elif [ $FOUND -eq 1 ] && [ $JUMPSTATUS -eq 0 ]; then
-      echo "Jumped to target ${1}"
-   elif [ $FOUND -eq 1 ] && [ $JUMPSTATUS -ne 0 ]; then
-      echo "Incorrect jump path for ${1}"
-   else
-      echo "Failed to find target ${1}"
-   fi
+   if [ ! $1=="list" ]; then 
+      if [ $FOUND -eq 0 ] && [ $# -eq 2 ]; then
+         echo "${1} ${2}" >> $INPUT
+         echo "Added new target to save file!"
+      elif [ $FOUND -eq 1 ] && [ $JUMPSTATUS -eq 0 ]; then
+         echo "Jumped to target ${1}"
+      elif [ $FOUND -eq 1 ] && [ $JUMPSTATUS -ne 0 ]; then
+         echo "Incorrect jump path for ${1}"
+      else
+         echo "Failed to find target ${1}"
+      fi
+   fi 
 fi 
