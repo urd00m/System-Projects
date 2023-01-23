@@ -45,7 +45,7 @@ else
    done < "$INPUT"
    
    # check if appending new target or output
-   if [ ! $1=="list" ]; then 
+   if [ $1 != "list" ]; then 
       if [ $FOUND -eq 0 ] && [ $# -eq 2 ]; then
          echo "${1} ${2}" >> $INPUT
          echo "Added new target to save file!"
