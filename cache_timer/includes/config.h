@@ -1,1 +1,1 @@
-#define CONFIG_DEBUG_LEVEL 1
+#define CONFIG_DEBUG_LEVEL 0
