@@ -18,6 +18,7 @@ Creating my own output macro that allows for menuconfig configuration (setting d
 
 ## cache_timing
 Playing with cache timing attacks and seeing how cache side channels can be used to leak secret information. Various microarchitectural attacks take advantage of cache side channels to leak information. 
+* TODO --> need to make some repairs, some data for `eviction_reload` is incorrect
 
 ## quickbin
 Tools for the command line. Includes tools to speedup software development. 
@@ -37,3 +38,6 @@ Possible OS to achieve a specific task
 ## TODO? Nala system assistant?
 Possible terminal based voice assistant?
 
+## TODO? Spectre project 
+
+## TODO? Rowhammer project? 

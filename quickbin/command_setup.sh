@@ -8,8 +8,3 @@ alias n="nano"
 alias e="emacs"
 alias dbuild="dbuild.py"
 alias qjump="source qjump"
-
-# PBS commands
-alias teardown="./docker-pbs-stop.sh && ./docker-pbs-destroy.sh"
-alias rebuild="./docker-pbs-build.sh && ./docker-pbs-create.sh && ./docker-pbs-start.sh && ./docker-pbs-shell.sh"
-alias shell="./docker-pbs-shell.sh"
