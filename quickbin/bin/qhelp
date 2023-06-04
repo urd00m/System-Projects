@@ -8,3 +8,4 @@ echo qbin"              "------ jump to quickbin
 echo qtest"             "------ test if quickbin is working
 echo gen"               "------ generate code files quickly - comes with templates
 echo dbuild"            "------ generate coding directory quickly - comes with templates for things
+echo qjump"             "------ quickly jump into different directories built for ease of use and speed
