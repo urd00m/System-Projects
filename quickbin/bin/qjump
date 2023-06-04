@@ -1,5 +1,6 @@
 #!/bin/bash
 
+########## SETUP ##########
 # script directory
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
@@ -9,11 +10,11 @@ if [ ! -f "$DEFAULT_SAVE_FILE" ]; then
     touch $DEFAULT_SAVE_FILE
 fi
 
-# argument check
-if [ $# -lt 1 ] || [ $# -gt 2 ]; then
-   echo "Incorrect usage!"
-   echo "Usage: qjump [TARGET -- REQUIRED] [NEW DESTINATION - OPTIONAL]"
-else 
+########## READ_FILE ##########
+########## $1 Input word to search for
+########## $2 Optional, if there is an edit 
+read_file()
+{
    # read file
    INPUT=$DEFAULT_SAVE_FILE
    FOUND=0
@@ -21,9 +22,6 @@ else
    LINENUM=1
    while IFS= read -r LINE
    do
-     if [ $1 == "list" ]; then 
-        echo $LINE 
-     else 
       # split by space 
       LINEARRAY=($LINE)
       
@@ -31,7 +29,7 @@ else
       if [[ $1 == ${LINEARRAY[0]} ]]; then
          if [ $# -eq 1 ]; then
             cd "${LINEARRAY[1]}"
-            JUMPSTATUS=$?
+            JUMPSTATUS=$? 
             FOUND=1
             break
          else
@@ -41,20 +39,65 @@ else
          fi
       fi
       LINENUM=$((LINENUM+1))
-     fi 
    done < "$INPUT"
    
    # check if appending new target or output
-   if [ $1 != "list" ]; then 
-      if [ $FOUND -eq 0 ] && [ $# -eq 2 ]; then
-         echo "${1} ${2}" >> $INPUT
-         echo "Added new target to save file!"
-      elif [ $FOUND -eq 1 ] && [ $JUMPSTATUS -eq 0 ]; then
-         echo "Jumped to target ${1}"
-      elif [ $FOUND -eq 1 ] && [ $JUMPSTATUS -ne 0 ]; then
-         echo "Incorrect jump path for ${1}"
-      else
-         echo "Failed to find target ${1}"
-      fi
-   fi 
-fi 
+   if [ $FOUND -eq 0 ] && [ $# -eq 2 ]; then ### TODO editing feature only appending right now 
+       echo "${1} ${2}" >> $INPUT
+       echo "Added new target to save file!"
+   elif [ $FOUND -eq 1 ] && [ $JUMPSTATUS -eq 0 ]; then
+       echo "Jumped to target ${1}"
+   elif [ $FOUND -eq 1 ] && [ $JUMPSTATUS -ne 0 ]; then
+       echo "Incorrect jump path for ${1}"
+       return 1
+   else
+       echo "Failed to find target ${1}"
+       return 1
+   fi
+   return 0
+}
+
+########## LIST ##########
+list() {
+    cat $DEFAULT_SAVE_FILE
+    return 0
+}
+
+########## HELP ##########
+help() {
+    echo QJUMP - the cd shortcut tool
+    echo "USAGE - 'qjump <command>' or 'qjump <target>' or 'qjump <target> <destination>'"
+    echo COMMANDS - list, help, edit
+    echo "Created by urd00m <Alan Wang>"
+    return 0
+}
+
+########## EDIT ##########
+edit() {
+    emacs $DEFAULT_SAVE_FILE
+    return 0
+}
+
+########## MAIN ##########
+if [ $# -lt 1 ] || [ $# -gt 2 ]; then # Argument Check
+   echo "Incorrect usage!"
+   echo "Usage: qjump [TARGET -- REQUIRED] [NEW DESTINATION - OPTIONAL]"
+   echo "Type qjump help for more information" 
+else 
+    if [ $1 == "list" ]; then
+        list
+    elif [ $1 == "help" ]; then
+        help
+    elif [ $1 == "edit" ]; then
+        edit
+    elif [ $2 == "." ]; then
+        read_file $1 $(pwd)
+        echo Target is $(pwd)
+    else
+        if [ $# -eq 1 ]; then 
+            read_file $1
+        else
+            read_file $1 $2
+        fi
+    fi
+fi
