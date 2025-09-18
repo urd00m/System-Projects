@@ -74,7 +74,7 @@ help() {
 
 ########## EDIT ##########
 edit() {
-    emacs $DEFAULT_SAVE_FILE
+    nano $DEFAULT_SAVE_FILE
     return 0
 }
 
