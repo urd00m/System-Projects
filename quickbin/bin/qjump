@@ -4,10 +4,10 @@
 # script directory
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
-# qjump files 
+# qjump files
 DEFAULT_SAVE_FILE="$SCRIPT_DIR/.qjump_save"
 if [ ! -f "$DEFAULT_SAVE_FILE" ]; then
-    touch $DEFAULT_SAVE_FILE
+    touch "$DEFAULT_SAVE_FILE"
 fi
 
 ########## READ_FILE ##########
@@ -22,18 +22,19 @@ read_file()
    LINENUM=1
    while IFS= read -r LINE
    do
-      # split by space 
-      LINEARRAY=($LINE)
-      
+      # split into key (first word) and value (rest of line, may contain spaces)
+      KEY="${LINE%% *}"
+      VAL="${LINE#* }"
+
       # check if matches input
-      if [[ $1 == ${LINEARRAY[0]} ]]; then
+      if [[ "$1" == "$KEY" ]]; then
          if [ $# -eq 1 ]; then
-            cd "${LINEARRAY[1]}"
-            JUMPSTATUS=$? 
+            cd "$VAL"
+            JUMPSTATUS=$?
             FOUND=1
             break
          else
-            sed -i'' -e ''${LINENUM}'d' $INPUT
+            sed -i'' -e "${LINENUM}d" "$INPUT"
             FOUND=0
             break
          fi
@@ -42,8 +43,8 @@ read_file()
    done < "$INPUT"
    
    # check if appending new target or output
-   if [ $FOUND -eq 0 ] && [ $# -eq 2 ]; then ### TODO editing feature only appending right now 
-       echo "${1} ${2}" >> $INPUT
+   if [ $FOUND -eq 0 ] && [ $# -eq 2 ]; then ### TODO editing feature only appending right now
+       echo "${1} ${2}" >> "$INPUT"
        echo "Added new target to save file!"
    elif [ $FOUND -eq 1 ] && [ $JUMPSTATUS -eq 0 ]; then
        echo "Jumped to target ${1}"
@@ -59,7 +60,7 @@ read_file()
 
 ########## LIST ##########
 list() {
-    cat $DEFAULT_SAVE_FILE
+    cat "$DEFAULT_SAVE_FILE"
     return 0
 }
 
@@ -74,7 +75,7 @@ help() {
 
 ########## EDIT ##########
 edit() {
-    nano $DEFAULT_SAVE_FILE
+    nano "$DEFAULT_SAVE_FILE"
     return 0
 }
 
@@ -84,20 +85,20 @@ if [ $# -lt 1 ] || [ $# -gt 2 ]; then # Argument Check
    echo "Usage: qjump [TARGET -- REQUIRED] [NEW DESTINATION - OPTIONAL]"
    echo "Type qjump help for more information" 
 else
-    if [ $1 == "list" ]; then
+    if [ "$1" == "list" ]; then
         list
-    elif [ $1 == "help" ]; then
+    elif [ "$1" == "help" ]; then
         help
-    elif [ $1 == "edit" ]; then
+    elif [ "$1" == "edit" ]; then
         edit
-    elif [ $# -eq 2 ] && [ $2 == "." ]; then
-        read_file $1 $(pwd)
-        echo Target is $(pwd)
+    elif [ $# -eq 2 ] && [ "$2" == "." ]; then
+        read_file "$1" "$(pwd)"
+        echo "Target is $(pwd)"
     else
-        if [ $# -eq 1 ]; then 
-            read_file $1
+        if [ $# -eq 1 ]; then
+            read_file "$1"
         else
-            read_file $1 $2
+            read_file "$1" "$2"
         fi
     fi
 fi
