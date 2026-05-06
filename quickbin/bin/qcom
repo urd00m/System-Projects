@@ -1,0 +1,103 @@
+#!/bin/bash
+
+########## SETUP ##########
+# script directory
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+
+# qcom files
+DEFAULT_SAVE_FILE="$SCRIPT_DIR/.qcom_save"
+if [ ! -f "$DEFAULT_SAVE_FILE" ]; then
+    touch "$DEFAULT_SAVE_FILE"
+fi
+
+########## READ_FILE ##########
+########## $1 Alias to look up
+########## $2 Optional, command string to save (deletes existing entry if alias already present)
+read_file()
+{
+   # read file
+   INPUT=$DEFAULT_SAVE_FILE
+   FOUND=0
+   RUNSTATUS=0
+   LINENUM=1
+   # TODO: support multi-line commands per alias (e.g. block format like [alias]...[/alias],
+   # or escaped \n decoded with printf). For now each alias is one line; chain with ;, &&, ||.
+   while IFS= read -r LINE
+   do
+      # split into key (first word) and command (rest of line, may contain spaces / separators)
+      KEY="${LINE%% *}"
+      CMD="${LINE#* }"
+
+      # check if matches input
+      if [[ "$1" == "$KEY" ]]; then
+         if [ $# -eq 1 ]; then
+            eval "$CMD"
+            RUNSTATUS=$?
+            FOUND=1
+            break
+         else
+            sed -i'' -e "${LINENUM}d" "$INPUT"
+            FOUND=0
+            break
+         fi
+      fi
+      LINENUM=$((LINENUM+1))
+   done < "$INPUT"
+
+   # check if appending new alias or reporting result
+   if [ $FOUND -eq 0 ] && [ $# -eq 2 ]; then ### TODO editing feature only appending right now
+       echo "${1} ${2}" >> "$INPUT"
+       echo "Added new command to save file!"
+   elif [ $FOUND -eq 1 ] && [ $RUNSTATUS -eq 0 ]; then
+       echo "Ran command ${1}"
+   elif [ $FOUND -eq 1 ] && [ $RUNSTATUS -ne 0 ]; then
+       echo "Command ${1} exited with status ${RUNSTATUS}"
+       return 1
+   else
+       echo "Failed to find command ${1}"
+       return 1
+   fi
+   return 0
+}
+
+########## LIST ##########
+list() {
+    cat "$DEFAULT_SAVE_FILE"
+    return 0
+}
+
+########## HELP ##########
+help() {
+    echo QCOM - the bash command shortcut tool
+    echo "USAGE - 'qcom <command>' or 'qcom <alias>' or 'qcom <alias> <bash command>'"
+    echo COMMANDS - list, help, edit
+    echo "Created by urd00m <Alan Wang> with Claude Opus 4.7"
+    return 0
+}
+
+########## EDIT ##########
+edit() {
+    nano "$DEFAULT_SAVE_FILE"
+    return 0
+}
+
+########## MAIN ##########
+if [ $# -lt 1 ] || [ $# -gt 2 ]; then # Argument Check
+   echo "Incorrect usage!"
+   echo "Usage: qcom [ALIAS -- REQUIRED] [BASH COMMAND - OPTIONAL]"
+   echo "Type qcom help for more information"
+else
+    if [ "$1" == "list" ]; then
+        list
+    elif [ "$1" == "help" ]; then
+        help
+    elif [ "$1" == "edit" ]; then
+        edit
+    else
+        if [ $# -eq 1 ]; then
+            read_file "$1"
+        else
+            read_file "$1" "$2"
+        fi
+    fi
+fi
